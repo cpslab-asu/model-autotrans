@@ -16,6 +16,11 @@ class Vehicle:
         self._transmission_rpm = initial_transmission_rpm
         self._vehicle_speed = 0.0
 
+
+    def _compute_wheel_speed(self) -> float:
+        # Integrate VehicleInertia over time
+        ...
+
     def _compute_speed(self, output_torque: float, brake: float) -> float:
         ...
 
