@@ -35,7 +35,7 @@ class Autotrans:
         self._engine.step(self._transmission.impeller_torque, throttle)
         self._shift_logic.step(throttle, self._vehicle.vehicle_speed)
         self._transmission.step(
-            self._engine.engine_rpm,
+            self._engine.rpm,
             self._shift_logic.current_gear,
             self._vehicle.transmission_rpm
         )
@@ -48,7 +48,7 @@ class Autotrans:
             self._transmission.output_torque,
             self._vehicle.vehicle_speed,
             self._vehicle.transmission_rpm,
-            self._engine.engine_rpm,
+            self._engine.rpm,
             self._shift_logic.current_gear
         )
 
