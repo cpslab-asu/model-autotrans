@@ -1,4 +1,4 @@
-from shift_logic import Gear
+from .shift_logic import Gear
 
 
 class Transmission:
