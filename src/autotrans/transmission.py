@@ -81,7 +81,7 @@ class Transmission:
         Gear.FIRST: 2.393,
         Gear.SECOND: 1.450,
         Gear.THIRD: 1.000,
-        Gear.FOURTH: 0.667
+        Gear.FOURTH: 0.677
     }
     K_FACTOR_TABLE = LookupTable1D(SPEED_RATIO, K_FACTOR_VALUES)
     TORQUE_RATIO_TABLE = LookupTable1D(SPEED_RATIO, TORQUE_VALUES)
