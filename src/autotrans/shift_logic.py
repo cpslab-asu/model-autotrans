@@ -1,8 +1,9 @@
-from enum import Enum, IntEnum, auto
+from enum import Enum, IntEnum, auto, unique
 
 from transitions import Machine, EventData
 
 
+@unique
 class Gear(IntEnum):
     FIRST = 1
     SECOND = 2
@@ -43,6 +44,7 @@ def should_not_shift(event: EventData) -> bool:
     return lo_threshold <= event.kwargs.get("vehicle_speed") <= hi_threshold
 
 
+@unique
 class SelectionState(Enum):
     STEADY_STATE = auto(),
     UP_SHIFTING = auto(),
