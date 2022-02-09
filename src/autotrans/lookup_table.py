@@ -75,6 +75,12 @@ def _index_bounds(seq: NDArray[ValueT], value: ValueT) -> tuple[int, int]:
     upper_indices, = np.where(seq >= value)
     upper_bound = upper_indices[0]
 
+    if lower_bound == upper_bound:
+        if upper_bound == seq.size - 1:
+            lower_bound = lower_bound - 1
+        else:
+            upper_bound = upper_bound + 1
+
     return lower_bound, upper_bound
 
 
@@ -87,7 +93,13 @@ class LookupTable1D(Generic[Dim1T]):
     _values: NDArray[np.float]
 
     def lookup(self, x: ValueT) -> float:
-        pass
+        x_lower_index, x_upper_index = _index_bounds(self._breakpoints, x)
+        interpolator = LinearInterpolator(
+            q1=(self._breakpoints[x_lower_index], self._values[x_lower_index]),
+            q2=(self._breakpoints[x_upper_index], self._values[x_upper_index])
+        )
+
+        return interpolator.interpolate(x)
 
 
 Dim2T = TypeVar("Dim2T", bound=np.generic)
@@ -106,33 +118,18 @@ class LookupTable2D(Generic[Dim1T, Dim2T]):
 
     def lookup(self, x1: Dim1T, x2: Dim2T):
         x1_lower_index, x1_upper_index = _index_bounds(self._x1_breakpoints, x1)
-        index_distance = self._x1_breakpoints[x1_upper_index] - self._x1_breakpoints[x1_lower_index]
-
-        if index_distance == 0:
-            if x1_lower_index < self._x1_breakpoints.size - 1:
-                x1_upper_index = x1_upper_index + 1
-            else:
-                x1_lower_index = x1_upper_index - 1
-
         x2_lower_index, x2_upper_index = _index_bounds(self._x2_breakpoints, x2)
-        index_distance = self._x2_breakpoints[x2_upper_index] - self._x2_breakpoints[x2_lower_index]
 
-        if index_distance == 0:
-            if x2_lower_index < self._x2_breakpoints.size - 1:
-                x2_upper_index = x2_lower_index + 1
-            else:
-                x2_lower_index = x2_upper_index - 1
-
-        x1_lower_value = self._x1_breakpoints[x1_lower_index]
-        x1_upper_value = self._x1_breakpoints[x1_upper_index]
-        x2_lower_value = self._x2_breakpoints[x2_lower_index]
-        x2_upper_value = self._x2_breakpoints[x2_upper_index]
+        x1_1 = self._x1_breakpoints[x1_lower_index]
+        x1_2 = self._x1_breakpoints[x1_upper_index]
+        x2_1 = self._x2_breakpoints[x2_lower_index]
+        x2_2 = self._x2_breakpoints[x2_upper_index]
 
         interpolator = BilinearInterpolator(
-            q11=(x1_lower_value, x2_lower_value, self._values[x1_lower_index, x2_lower_index]),
-            q12=(x1_lower_value, x2_upper_value, self._values[x1_lower_index, x2_upper_index]),
-            q21=(x1_upper_value, x2_lower_value, self._values[x1_upper_index, x2_lower_index]),
-            q22=(x2_upper_value, x2_upper_value, self._values[x1_upper_index, x2_upper_index]),
+            q11=(x1_1, x2_1, self._values[x1_lower_index, x2_lower_index]),
+            q12=(x1_1, x2_2, self._values[x1_lower_index, x2_upper_index]),
+            q21=(x1_2, x2_1, self._values[x1_upper_index, x2_lower_index]),
+            q22=(x1_1, x2_2, self._values[x1_upper_index, x2_upper_index]),
         )
 
         return interpolator.interpolate(x1, x2)
