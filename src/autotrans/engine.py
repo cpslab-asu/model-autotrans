@@ -1,58 +1,47 @@
 import numpy as np
 import scipy.integrate as integrate
 
+from .lookup_table import LookupTable2D
+
+THROTTLE_BREAKPOINTS = np.array([0, 20, 30, 40, 50, 60, 70, 80, 90, 100], dtype=np.float64)
+RPM_BREAKPOINTS = np.array([
+    799.99,
+    1200.00,
+    1599.99,
+    1999.99,
+    2400.00,
+    2800.00,
+    3199.99,
+    3599.99,
+    3999.99,
+    4400.00,
+    4800.00
+], dtype=np.float64)
+ENGINE_TORQUE_TABLE_VALUES = np.array([
+    [-40, -44, -49, -53, -57, -61, -65, -70, -74, -78, -82],
+    [215, 117, 85, 66, 44, 29, 10, -2, -13, -22, -32],
+    [245, 208, 178, 148, 122, 104, 85, 66, 48, 33, 18],
+    [264, 260, 241, 219, 193, 167, 152, 133, 119, 96, 85],
+    [264, 279, 282, 275, 260, 238, 223, 208, 189, 171, 152],
+    [267, 290, 293, 297, 290, 275, 260, 256, 234, 212, 193],
+    [267, 297, 305, 305, 305, 301, 293, 282, 267, 249, 226],
+    [267, 301, 308, 312, 319, 323, 319, 316, 297, 279, 253],
+    [267, 301, 312, 319, 327, 327, 327, 327, 312, 293, 267],
+    [267, 301, 312, 319, 327, 334, 334, 334, 319, 305, 275],
+], dtype=np.float64)
+
 
 class Engine:
-    THROTTLE_BREAKPOINTS = np.array([0, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
-    RPM_BREAKPOINTS = np.array([
-        799.99,
-        1200.00,
-        1599.99,
-        1999.99,
-        2400.00,
-        2800.00,
-        3199.99,
-        3599.99,
-        3999.99,
-        4400.00,
-        4800.00
-    ])
-    ENGINE_TORQUE_TABLE = np.array([
-        [-40, -44, -49, -53, -57, -61, -65, -70, -74, -78, -82],
-        [215, 117, 85, 66, 44, 29, 10, -2, -13, -22, -32],
-        [245, 208, 178, 148, 122, 104, 85, 66, 48, 33, 18],
-        [264, 260, 241, 219, 193, 167, 152, 133, 119, 96, 85],
-        [264, 279, 282, 275, 260, 238, 223, 208, 189, 171, 152],
-        [267, 290, 293, 297, 290, 275, 260, 256, 234, 212, 193],
-        [267, 297, 305, 305, 305, 301, 293, 282, 267, 249, 226],
-        [267, 301, 308, 312, 319, 323, 319, 316, 297, 279, 253],
-        [267, 301, 312, 319, 327, 327, 327, 327, 312, 293, 267],
-        [267, 301, 312, 319, 327, 334, 334, 334, 319, 305, 275],
-    ])
+    ENGINE_TORQUE_TABLE = LookupTable2D(
+        THROTTLE_BREAKPOINTS,
+        RPM_BREAKPOINTS,
+        ENGINE_TORQUE_TABLE_VALUES
+    )
 
     def __init__(self, time_step_ms: int, engine_propeller_inertia: float = 0.0, initial_rpm: float = 0.0):
         self._time_step = time_step_ms / 1000
         self._inertia = engine_propeller_inertia
         self._rpm = initial_rpm
-
-    def _compute_engine_torque(self, throttle: float):
-        rpm_dim_indices = np.linspace(0, self.RPM_BREAKPOINTS.size, num=self.RPM_BREAKPOINTS.size)
-        rpm_interpolator = interpolate.interp1d(
-            self.RPM_BREAKPOINTS,
-            rpm_dim_indices,
-            kind="zero",
-            fill_value="extrapolate"
-        )
-        throttle_dim_indices = np.linspace(0, self.THROTTLE_BREAKPOINTS.size, num=self.THROTTLE_BREAKPOINTS.size)
-        throttle_interpolator = interpolate.interp1d(
-            self.THROTTLE_BREAKPOINTS,
-            throttle_dim_indices,
-            kind="zero",
-            fill_value="extrapolate"
-        )
-        torque_table_index = (throttle_interpolator(throttle), rpm_interpolator(self._rpm))
-
-        return self.ENGINE_TORQUE_TABLE[torque_table_index]
 
     def step(self, throttle: float, impeller_torque: float):
         """Integrate engine inertia over one time step to compute engine RPM with saturation limits at 600 & 6,000
@@ -65,8 +54,8 @@ class Engine:
         """
         assert 0 <= throttle <= 100
 
-        engine_torque = self._compute_engine_torque(throttle)
-        engine_propeller_inertia = (impeller_torque + engine_torque) / self._inertia
+        engine_torque = self.ENGINE_TORQUE_TABLE.lookup(throttle, self._rpm)
+        engine_propeller_inertia = (engine_torque - impeller_torque) / self._inertia
         result = integrate.solve_ivp(
             fun=lambda t, x: engine_propeller_inertia,
             t_span=(0, self._time_step),
