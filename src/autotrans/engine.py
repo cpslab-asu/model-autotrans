@@ -1,6 +1,5 @@
 import numpy as np
 import scipy.integrate as integrate
-import scipy.interpolate as interpolate
 
 
 class Engine:
@@ -32,7 +31,7 @@ class Engine:
     ])
 
     def __init__(self, time_step_ms: int, engine_propeller_inertia: float = 0.0, initial_rpm: float = 0.0):
-        self._time_step = time_step_ms
+        self._time_step = time_step_ms / 1000
         self._inertia = engine_propeller_inertia
         self._rpm = initial_rpm
 
@@ -61,19 +60,20 @@ class Engine:
         This method updates the state of this class so that the data can be fed forward into other components.
 
         Args:
-            throttle: Throttle signal in the range [0, 1)
+            throttle: Throttle signal in the range [0, 100]
             impeller_torque: The torque of the impeller
         """
+        assert 0 <= throttle <= 100
 
         engine_torque = self._compute_engine_torque(throttle)
         engine_propeller_inertia = (impeller_torque + engine_torque) / self._inertia
         result = integrate.solve_ivp(
-            fun=lambda t_, y_: engine_propeller_inertia,
+            fun=lambda t, x: engine_propeller_inertia,
             t_span=(0, self._time_step),
             y0=np.array([self._rpm]),
             method="RK45",
         )
-        y = result[1]
+        y = result["y"].flatten()
 
         self._rpm = max(600.0, min(6_000.0, y[-1]))
 
