@@ -169,14 +169,14 @@ class ShiftLogic:
                 "source": SelectionState.UP_SHIFTING,
                 "dest": SelectionState.STEADY_STATE,
                 "conditions": [should_shift_up, selection_state_model.shift_duration_met],
-                "after": [self._gear_state.shift_up]
+                "after": [self._gear_state.shift_up, selection_state_model.reset_counter]
             },
             {
                 "trigger": "step",
                 "source": SelectionState.DOWN_SHIFTING,
                 "dest": SelectionState.STEADY_STATE,
                 "conditions": [should_shift_down, selection_state_model.shift_duration_met],
-                "after": [self._gear_state.shift_down]
+                "after": [self._gear_state.shift_down, selection_state_model.reset_counter]
             }
         ]
         self._selection_state = selection_state_model
