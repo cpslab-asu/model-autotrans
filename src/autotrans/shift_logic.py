@@ -133,15 +133,15 @@ class ShiftLogic:
                 "trigger": "step",
                 "source": SelectionState.STEADY_STATE,
                 "dest": SelectionState.UP_SHIFTING,
-                "conditions": [should_begin_shift_up],
-                "after": [selection_state_model.increment_timer]
+                "conditions": [should_shift_up],
+                "after": [selection_state_model.increment_counter]
             },
             {
                 "trigger": "step",
                 "source": SelectionState.STEADY_STATE,
                 "dest": SelectionState.DOWN_SHIFTING,
-                "conditions": [should_begin_shift_down],
-                "after": [selection_state_model.increment_timer]
+                "conditions": [should_shift_down],
+                "after": [selection_state_model.increment_counter]
             },
             {
                 "trigger": "step",
@@ -155,14 +155,14 @@ class ShiftLogic:
                 "source": SelectionState.UP_SHIFTING,
                 "dest": None,
                 "conditions": [should_shift_up, selection_state_model.shift_duration_not_met],
-                "after": [selection_state_model.increment_timer]
+                "after": [selection_state_model.increment_counter]
             },
             {
                 "trigger": "step",
                 "source": SelectionState.DOWN_SHIFTING,
                 "dest": None,
                 "conditions": [should_shift_down, selection_state_model.shift_duration_not_met],
-                "after": [selection_state_model.increment_timer],
+                "after": [selection_state_model.increment_counter],
             },
             {
                 "trigger": "step",
