@@ -33,7 +33,7 @@ class Autotrans:
         assert brake >= 0.0
 
         self._engine.step(self._transmission.impeller_torque, throttle)
-        self._shift_logic.step(throttle, self._vehicle.vehicle_speed)
+        self._shift_logic.step(throttle, self._vehicle.speed)
         self._transmission.step(
             self._engine.rpm,
             self._shift_logic.current_gear,
@@ -46,7 +46,7 @@ class Autotrans:
         return AutotransState(
             self._transmission.impeller_torque,
             self._transmission.output_torque,
-            self._vehicle.vehicle_speed,
+            self._vehicle.speed,
             self._vehicle.transmission_rpm,
             self._engine.rpm,
             self._shift_logic.current_gear
