@@ -126,6 +126,12 @@ class ShiftLogic:
             {
                 "trigger": "step",
                 "source": SelectionState.STEADY_STATE,
+                "dest": None,
+                "conditions": [should_not_shift],
+            },
+            {
+                "trigger": "step",
+                "source": SelectionState.STEADY_STATE,
                 "dest": SelectionState.UP_SHIFTING,
                 "conditions": [should_begin_shift_up],
                 "after": [selection_state_model.increment_timer]
