@@ -10,11 +10,9 @@ from autotrans.shift_logic import ShiftLogic, Gear, up_shift_threshold, down_shi
 
 def test_upshift_threshold():
     threshold_0s = up_shift_threshold(Gear.FIRST, throttle=59.9463087248322)
-    threshold_1_72s = up_shift_threshold(Gear.FIRST, throttle=57.6912751677852)
     threshold_5s = up_shift_threshold(Gear.THIRD, throttle=53.2885906040268)
 
     assert threshold_0s == pytest.approx(27.2271812080537, abs=1e-3)
-    assert threshold_1_72s == pytest.approx(26.2687919463087, abs=1e-3)
     assert threshold_5s == pytest.approx(63.2885906040268, abs=1e-3)
 
 
