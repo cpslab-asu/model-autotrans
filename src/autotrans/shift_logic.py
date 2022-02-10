@@ -93,7 +93,7 @@ class SelectionStateModel:
     def reset_counter(self, *_):
         self._counter = 0
 
-    def increment_timer(self, *_):
+    def increment_counter(self, *_):
         self._counter += 1
 
     def shift_duration_met(self, *_) -> bool:
