@@ -38,15 +38,16 @@ class Engine:
         ENGINE_TORQUE_TABLE_VALUES
     )
 
-    def __init__(self, time_step_ms: int, engine_propeller_inertia: float = 0.0, initial_rpm: float = 0.0):
+    def __init__(self, time_step_ms: int, engine_propeller_inertia: float, initial_rpm: float):
         self._time_step = time_step_ms / 1000
         self._inertia = engine_propeller_inertia
         self._rpm = initial_rpm
 
     def step(self, throttle: float, impeller_torque: float):
-        """Integrate engine inertia over one time step to compute engine RPM with saturation limits at 600 & 6,000
+        """Integrate engine inertia over one time step to compute engine RPM
 
-        This method updates the state of this class so that the data can be fed forward into other components.
+        Engine RPM value has saturation limits at 600 & 6,000. This method updates the state of this
+        class so that the data can be fed forward into other components.
 
         Args:
             throttle: Throttle signal in the range [0, 100]
@@ -55,9 +56,11 @@ class Engine:
         assert 0 <= throttle <= 100
 
         engine_torque = self.ENGINE_TORQUE_TABLE.lookup(throttle, self._rpm)
-        engine_propeller_inertia = (engine_torque - impeller_torque) / self._inertia
+        engine_impeller_inertia = (engine_torque - impeller_torque) / self._inertia
+
+        # TODO: Resolve integral computation disparity
         result = integrate.solve_ivp(
-            fun=lambda t, x: engine_propeller_inertia,
+            fun=lambda t, x: engine_impeller_inertia,
             t_span=(0, self._time_step),
             y0=np.array([self._rpm]),
             method="RK45",
@@ -69,4 +72,3 @@ class Engine:
     @property
     def rpm(self) -> float:
         return self._rpm
-
