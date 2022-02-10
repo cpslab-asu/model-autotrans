@@ -104,7 +104,7 @@ class SelectionStateModel:
 
 
 class ShiftLogic:
-    def __init__(self, wait_ticks: int, initial_gear: Gear, initial_throttle: float, initial_speed: float):
+    def __init__(self, wait_ticks: int, initial_gear: Gear):
         gear_state_states = [gear for gear in Gear]
         gear_state_transitions = [
             {"trigger": "shift_up", "source": Gear.FIRST, "dest": Gear.SECOND},
@@ -180,12 +180,6 @@ class ShiftLogic:
             transitions=selection_state_transitions,
             initial=SelectionState.STEADY_STATE,
             send_event=True
-        )
-
-        self._selection_state.step(
-            throttle=initial_throttle,
-            vehicle_speed=initial_speed,
-            current_gear=self._gear_state.state
         )
 
     @property
