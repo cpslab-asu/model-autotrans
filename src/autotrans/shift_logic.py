@@ -84,6 +84,7 @@ class StepMethod(Protocol):
 
 class SelectionStateModel:
     step: StepMethod
+    state: SelectionState
 
     def __init__(self, wait_ticks: int):
         self._counter = 0
