@@ -45,28 +45,12 @@ def down_shift_threshold(gear: Gear, throttle: float) -> float:
     return table.lookup(throttle, gear)
 
 
-def should_begin_shift_up(event: EventData) -> bool:
-    throttle = event.kwargs.get("throttle")
-    current_gear = event.kwargs.get("current_gear")
-    threshold = up_shift_threshold(current_gear, throttle)
-
-    return event.kwargs.get("vehicle_speed") > threshold
-
-
 def should_shift_up(event: EventData) -> bool:
     throttle = event.kwargs.get("throttle")
     current_gear = event.kwargs.get("current_gear")
     threshold = up_shift_threshold(current_gear, throttle)
 
     return event.kwargs.get("vehicle_speed") >= threshold
-
-
-def should_begin_shift_down(event: EventData) -> bool:
-    throttle = event.kwargs.get("throttle")
-    current_gear = event.kwargs.get("current_gear")
-    threshold = down_shift_threshold(current_gear, throttle)
-
-    return event.kwargs.get("vehicle_speed") < threshold
 
 
 def should_shift_down(event: EventData) -> bool:
