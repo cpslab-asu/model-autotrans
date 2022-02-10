@@ -14,9 +14,6 @@ class LinearInterpolator:
         x1, y1 = self.q1
         x2, y2 = self.q2
 
-        assert x1 < x2
-        assert x1 <= x <= x2
-
         return y1 + (x - x1) / (x2 - x1) * (y2 - y1)
 
 
@@ -32,12 +29,6 @@ class BilinearInterpolator:
         x2, _, f_q21 = self.q21
         _, y2, f_q12 = self.q12
         _, _, f_q22 = self.q22
-
-        assert x1 < x2
-        assert y1 < y2
-        assert x1 <= x <= x2
-        assert y1 <= y <= y2
-
         fx_y1 = (x2 - x) / (x2 - x1) * f_q11 + (x - x1) / (x2 - x1) * f_q21
         fx_y2 = (x2 - x) / (x2 - x1) * f_q12 + (x - x1) / (x2 - x1) * f_q22
 
@@ -70,10 +61,16 @@ def _index_bounds(seq: NDArray[ValueT], value: ValueT) -> tuple[int, int]:
     """
 
     lower_indices, = np.where(seq <= value)
-    lower_bound = lower_indices[-1]
+    if lower_indices.size == 0:
+        lower_bound = 0
+    else:
+        lower_bound = lower_indices[-1]
 
     upper_indices, = np.where(seq >= value)
-    upper_bound = upper_indices[0]
+    if upper_indices.size == 0:
+        upper_bound = seq.size - 1
+    else:
+        upper_bound = upper_indices[0]
 
     if lower_bound == upper_bound:
         if upper_bound == seq.size - 1:
