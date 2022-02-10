@@ -1,5 +1,3 @@
-import os.path as path
-
 import h5py
 
 import autotrans.engine as engine
@@ -7,8 +5,7 @@ import autotrans.engine as engine
 INERTIA = 0.021991488283555904
 
 
-def test_engine():
-    test_data = h5py.File(path.join(path.dirname(__file__), "test_data.h5"))
+def test_engine(test_data: h5py.File):
     throttle_trace = test_data["throttle"]
     impeller_torque_trace = test_data["impeller_torque"]
     engine_rpm = test_data["engine_rpm"]

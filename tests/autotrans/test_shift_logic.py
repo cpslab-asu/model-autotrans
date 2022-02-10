@@ -1,5 +1,3 @@
-from os import path
-
 import h5py
 import pytest
 
@@ -22,8 +20,7 @@ def test_downshift_threshold():
     assert threshold_5s == pytest.approx(31.6442953020134, abs=1e-3)
 
 
-def test_shift_logic():
-    test_data = h5py.File(path.join(path.dirname(__file__), "test_data.h5"))
+def test_shift_logic(test_data: h5py.File):
     throttle_trace = test_data["throttle"]
     vehicle_speed_trace = test_data["vehicle_speed"]
     gear_trace = test_data["gear"]

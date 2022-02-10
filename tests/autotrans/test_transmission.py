@@ -1,13 +1,10 @@
-from os import path
-
 import h5py
 import pytest
 
 from autotrans.transmission import Transmission
 
 
-def test_transmission():
-    test_data = h5py.File(path.join(path.dirname(__file__), "test_data.h5"))
+def test_transmission(test_data: h5py.File):
     transmission_rpm_trace = test_data["transmission_rpm"]
     engine_rpm_trace = test_data["engine_rpm"]
     gear_trace = test_data["gear"]
