@@ -3,7 +3,7 @@ import math
 import numpy as np
 
 from .shift_logic import Gear
-from .lookup_table import LookupTable1D
+from autotrans.modeling.lookup_table import LookupTable1D
 
 K_FACTOR_VALUES = np.array([
     137.465208993806,

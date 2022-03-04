@@ -4,7 +4,7 @@ from typing import Protocol
 import numpy as np
 from transitions import Machine, EventData
 
-from .lookup_table import LookupTable2D
+from autotrans.modeling.lookup_table import LookupTable2D
 
 GEAR_BREAKPOINTS = np.arange(1, 5)
 UP_SHIFT_THROTTLE_BREAKPOINTS = np.array([0, 25, 35, 50, 90, 100], dtype=np.float64)

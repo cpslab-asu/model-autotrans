@@ -1,7 +1,8 @@
 import numpy as np
 import scipy.integrate as integrate
 
-from .lookup_table import LookupTable2D
+from autotrans.modeling.lookup_table import LookupTable2D
+from autotrans.modeling.integrator import Integrator, DormundPrince5Solver
 
 THROTTLE_BREAKPOINTS = np.array([0, 20, 30, 40, 50, 60, 70, 80, 90, 100], dtype=np.float64)
 RPM_BREAKPOINTS = np.array([
@@ -39,9 +40,16 @@ class Engine:
     )
 
     def __init__(self, time_step_ms: int, engine_propeller_inertia: float, initial_rpm: float):
-        self._time_step = time_step_ms / 1000
+        time_step = time_step_ms / 1000
+        solver = DormundPrince5Solver(time_step)
+
+        self._integrator = Integrator(
+            t0=0,
+            y0=initial_rpm,
+            solver=solver,
+            saturation_limits=(600, 6000)
+        )
         self._inertia = engine_propeller_inertia
-        self._rpm = initial_rpm
 
     def step(self, throttle: float, impeller_torque: float):
         """Integrate engine inertia over one time step to compute engine RPM
@@ -67,8 +75,6 @@ class Engine:
         )
         y = result["y"].flatten()
 
-        self._rpm = max(600.0, min(6_000.0, y[-1]))
-
     @property
     def rpm(self) -> float:
-        return self._rpm
+        return self._integrator.state
