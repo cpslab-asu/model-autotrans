@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import TypeVar, Generic
 
 import numpy as np
+import scipy.interpolate as interpolate
 from numpy.typing import NDArray
 
 
@@ -91,12 +92,14 @@ class LookupTable1D(Generic[Dim1T]):
 
     def lookup(self, x: ValueT) -> float:
         x_lower_index, x_upper_index = _index_bounds(self._breakpoints, x)
-        interpolator = LinearInterpolator(
-            q1=(self._breakpoints[x_lower_index], self._values[x_lower_index]),
-            q2=(self._breakpoints[x_upper_index], self._values[x_upper_index])
+        interpolator = interpolate.interp1d(
+            x=[self._breakpoints[x_lower_index], self._breakpoints[x_upper_index]],
+            y=[self._values[x_lower_index], self._values[x_upper_index]],
+            kind="linear",
+            fill_value="extrapolate"
         )
 
-        return interpolator.interpolate(x)
+        return interpolator(x)
 
 
 Dim2T = TypeVar("Dim2T", bound=np.generic)
@@ -122,11 +125,17 @@ class LookupTable2D(Generic[Dim1T, Dim2T]):
         x2_1 = self._x2_breakpoints[x2_lower_index]
         x2_2 = self._x2_breakpoints[x2_upper_index]
 
-        interpolator = BilinearInterpolator(
-            q11=(x1_1, x2_1, self._values[x1_lower_index, x2_lower_index]),
-            q12=(x1_1, x2_2, self._values[x1_lower_index, x2_upper_index]),
-            q21=(x1_2, x2_1, self._values[x1_upper_index, x2_lower_index]),
-            q22=(x1_1, x2_2, self._values[x1_upper_index, x2_upper_index]),
+        interpolator = interpolate.interp2d(
+            x=[x1_1, x1_1, x1_2, x1_2],
+            y=[x2_1, x2_2, x2_1, x2_2],
+            z=[
+                self._values[x1_lower_index, x2_lower_index],
+                self._values[x1_lower_index, x2_upper_index],
+                self._values[x1_upper_index, x2_lower_index],
+                self._values[x1_upper_index, x2_upper_index],
+            ],
+            kind="linear",
+            fill_value="extrapolate",
         )
 
-        return interpolator.interpolate(x1, x2)
+        return interpolator(x1, x2)

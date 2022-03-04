@@ -1,4 +1,4 @@
-from autotrans.lookup_table import LookupTable2D
+from autotrans.modeling.lookup_table import LookupTable2D
 from autotrans.engine import THROTTLE_BREAKPOINTS, RPM_BREAKPOINTS, ENGINE_TORQUE_TABLE_VALUES
 from pytest import approx
 
