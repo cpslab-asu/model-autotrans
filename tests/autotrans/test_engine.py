@@ -1,4 +1,5 @@
 import h5py
+import pytest
 
 import autotrans.engine as engine
 
@@ -21,7 +22,7 @@ def test_engine_impeller_inertia(test_data: h5py.File):
     for throttle, impeller_torque, rpm in inputs:
         outputs.append(model.engine_impeller_inertia(throttle, impeller_torque, rpm))
 
-    assert outputs == list(engine_impeller_inertia)
+    assert outputs == pytest.approx(list(engine_impeller_inertia), abs=0.0001)
 
 
 def test_engine_rpm(test_data: h5py.File):
