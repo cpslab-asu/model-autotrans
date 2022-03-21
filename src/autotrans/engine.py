@@ -1,5 +1,4 @@
 import numpy as np
-import scipy.integrate as integrate
 
 from autotrans.modeling.lookup_table import LookupTable2D
 from autotrans.modeling.integrator import Integrator, DormundPrince5Solver
@@ -63,15 +62,8 @@ class Engine:
         """
         assert 0 <= throttle <= 100
 
-        engine_torque = self.ENGINE_TORQUE_TABLE.lookup(throttle, self._rpm)
-        engine_impeller_inertia = (engine_torque - impeller_torque) / self._inertia
-
-        # TODO: Resolve integral computation disparity
-        result = integrate.solve_ivp(
-            fun=lambda t, x: engine_impeller_inertia,
-            t_span=(0, self._time_step),
-            y0=np.array([self._rpm]),
-            method="RK45",
+        self._integrator.integrate(
+            lambda _, rpm: self.engine_impeller_inertia(throttle, impeller_torque, rpm)
         )
         y = result["y"].flatten()
 
