@@ -98,8 +98,9 @@ class LookupTable1D(Generic[Dim1T]):
             kind="linear",
             fill_value="extrapolate"
         )
+        result = interpolator(x)
 
-        return interpolator(x)
+        return result[0]
 
 
 Dim2T = TypeVar("Dim2T", bound=np.generic)
@@ -137,5 +138,6 @@ class LookupTable2D(Generic[Dim1T, Dim2T]):
             kind="linear",
             fill_value="extrapolate",
         )
+        result = interpolator(x1, x2)
 
-        return interpolator(x1, x2)
+        return result[0]
