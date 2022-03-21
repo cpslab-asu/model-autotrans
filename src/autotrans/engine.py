@@ -1,6 +1,6 @@
 import numpy as np
+import scipy.interpolate as interpolate
 
-from autotrans.modeling.lookup_table import LookupTable2D
 from autotrans.modeling.integrator import Integrator, DormundPrince5Solver
 
 THROTTLE_BREAKPOINTS = np.array([0, 20, 30, 40, 50, 60, 70, 80, 90, 100], dtype=np.float64)
@@ -32,12 +32,6 @@ ENGINE_TORQUE_TABLE_VALUES = np.array([
 
 
 class Engine:
-    ENGINE_TORQUE_TABLE = LookupTable2D(
-        THROTTLE_BREAKPOINTS,
-        RPM_BREAKPOINTS,
-        ENGINE_TORQUE_TABLE_VALUES
-    )
-
     def __init__(self, time_step_ms: int, engine_propeller_inertia: float, initial_rpm: float):
         time_step = time_step_ms / 1000
         solver = DormundPrince5Solver(time_step)
@@ -51,8 +45,15 @@ class Engine:
         self._inertia = engine_propeller_inertia
 
     def engine_impeller_inertia(self, throttle: float, impeller_torque: float, rpm: float) -> float:
-        engine_torque = self.ENGINE_TORQUE_TABLE.lookup(throttle, rpm)
-        engine_impeller_inertia = (engine_torque - impeller_torque) / self._inertia
+        interpolator = interpolate.RectBivariateSpline(
+            THROTTLE_BREAKPOINTS,
+            RPM_BREAKPOINTS,
+            ENGINE_TORQUE_TABLE_VALUES,
+            kx=1,
+            ky=1
+        )
+        engine_torque = interpolator(throttle, rpm)
+        engine_impeller_inertia = (engine_torque.item() - impeller_torque) / self._inertia
 
         return engine_impeller_inertia
 
