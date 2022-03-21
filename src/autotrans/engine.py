@@ -50,6 +50,12 @@ class Engine:
         )
         self._inertia = engine_propeller_inertia
 
+    def engine_impeller_inertia(self, throttle: float, impeller_torque: float, rpm: float) -> float:
+        engine_torque = self.ENGINE_TORQUE_TABLE.lookup(throttle, rpm)
+        engine_impeller_inertia = (engine_torque - impeller_torque) / self._inertia
+
+        return engine_impeller_inertia
+
     def step(self, throttle: float, impeller_torque: float):
         """Integrate engine inertia over one time step to compute engine RPM
 
