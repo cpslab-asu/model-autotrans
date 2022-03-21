@@ -5,17 +5,17 @@ from autotrans.modeling.integrator import Integrator, DormundPrince5Solver
 
 THROTTLE_BREAKPOINTS = np.array([0, 20, 30, 40, 50, 60, 70, 80, 90, 100], dtype=np.float64)
 RPM_BREAKPOINTS = np.array([
-    799.99,
-    1200.00,
-    1599.99,
-    1999.99,
-    2400.00,
-    2800.00,
-    3199.99,
-    3599.99,
-    3999.99,
-    4400.00,
-    4800.00
+    799.99999999999989,
+    1200,
+    1599.9999999999998,
+    1999.9999999999998,
+    2400,
+    2800.0000000000005,
+    3199.9999999999995,
+    3599.9999999999995,
+    3999.9999999999995,
+    4400,
+    4800,
 ], dtype=np.float64)
 ENGINE_TORQUE_TABLE_VALUES = np.array([
     [-40, -44, -49, -53, -57, -61, -65, -70, -74, -78, -82],
