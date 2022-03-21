@@ -71,7 +71,6 @@ class Engine:
         self._integrator.integrate(
             lambda _, rpm: self.engine_impeller_inertia(throttle, impeller_torque, rpm)
         )
-        y = result["y"].flatten()
 
     @property
     def rpm(self) -> float:
