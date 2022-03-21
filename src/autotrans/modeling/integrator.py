@@ -42,18 +42,19 @@ class DormundPrince5Solver(Solver):
     def step(self, func: FirstOrderOde, time: float, state: float) -> tuple[float, float]:
         k1 = func(time, state)
         k2 = func(time + self.h * 1 / 5, state + self.h * np.dot([k1], self.TABLEAU[1]))
-        k3 = func(time + self.h * 3 / 10, state + self.h * np.dot([k1, k2], self.TABLEAU[2]))
-        k4 = func(time + self.h * 4 / 5, state + self.h * np.dot([k1, k2, k3], self.TABLEAU[3]))
-        k5 = func(time + self.h * 8 / 9, state + self.h * np.dot([k1, k2, k3, k4], self.TABLEAU[4]))
-        k6 = func(time + self.h * 1, state + self.h * np.dot([k1, k2, k3, k4, k5], self.TABLEAU[5]))
-        k7 = func(time + self.h * 1, state + self.h * np.dot([k1, k2, k3, k4, k5, k6], self.TABLEAU[6]))
+        k3 = func(time + self.h * 3 / 10, state + self.h * np.dot(np.hstack([k1, k2]), self.TABLEAU[2]))
+        k4 = func(time + self.h * 4 / 5, state + self.h * np.dot(np.hstack([k1, k2, k3]), self.TABLEAU[3]))
+        k5 = func(time + self.h * 8 / 9, state + self.h * np.dot(np.hstack([k1, k2, k3, k4]), self.TABLEAU[4]))
+        k6 = func(time + self.h * 1, state + self.h * np.dot(np.hstack([k1, k2, k3, k4, k5]), self.TABLEAU[5]))
+        k7 = func(time + self.h * 1, state + self.h * np.dot(np.hstack([k1, k2, k3, k4, k5, k6]), self.TABLEAU[6]))
 
         k = np.array([k1, k2, k3, k4, k5, k6, k7])
-        b = np.array([35/384, 0, 500/1113, 125/192, -2187/6784, 11/84, 0])
+        b = np.array([35/384, 0, 500/1113, 125/192, -2187/6784, 11/84, 0])  # 5-th order accurate solution
+        # b = np.array([5179/57600, 0, 7571/16695, 393/640, -92097/339200, 187/2100, 1/40])  # 4-th order accurate solution
         new_state = state + self.h * b.dot(k)
         new_time = time + self.h
 
-        return new_time, new_state
+        return new_time, new_state[0]
 
 
 SaturationLimits: TypeAlias = tuple[Optional[float], Optional[float]]
