@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.interpolate as interpolate
 
-from autotrans.modeling.integrator import Integrator, DormundPrince5Solver
+from .integration import Dp5Integrator
 
 THROTTLE_BREAKPOINTS = np.array([0, 20, 30, 40, 50, 60, 70, 80, 90, 100], dtype=np.float64)
 RPM_BREAKPOINTS = np.array([
@@ -32,17 +32,13 @@ ENGINE_TORQUE_TABLE_VALUES = np.array([
 
 
 class Engine:
-    def __init__(self, time_step_ms: int, engine_propeller_inertia: float, initial_rpm: float):
-        time_step = time_step_ms / 1000
-        solver = DormundPrince5Solver(time_step)
-
-        self._integrator = Integrator(
-            t0=0,
-            y0=initial_rpm,
-            solver=solver,
-            saturation_limits=(600, 6000)
-        )
+    def __init__(self, time_step_ms: int, engine_propeller_inertia: float, initial_rpm: float, initial_throttle: float, initial_impeller_torque: float):
+        self._time_step = time_step_ms / 1000
+        self._integrator = Dp5Integrator(self._time_step)
+        self._rpm = initial_rpm
         self._inertia = engine_propeller_inertia
+        self._last_throttle = initial_throttle
+        self._last_impeller_torque = initial_impeller_torque
 
     def engine_impeller_inertia(self, throttle: float, impeller_torque: float, rpm: float) -> float:
         interpolator = interpolate.RectBivariateSpline(
@@ -69,10 +65,28 @@ class Engine:
         """
         assert 0 <= throttle <= 100
 
-        self._integrator.integrate(
-            lambda _, rpm: self.engine_impeller_inertia(throttle, impeller_torque, rpm)
+        throttle_interpolator = interpolate.interp1d(
+            x=(0, self._time_step),
+            y=(self._last_throttle, throttle),
+            kind="slinear",
         )
+        torque_interpolator = interpolate.interp1d(
+            x=(0, self._time_step),
+            y=(self._last_impeller_torque, impeller_torque),
+            kind="slinear",
+        )
+
+        def integration_fn(t: float, rpm: float) -> float:
+            return self.engine_impeller_inertia(
+                throttle_interpolator(t),
+                torque_interpolator(t),
+                rpm
+            )
+
+        self._rpm = self._integrator.integrate(t0=0, y0=self._rpm, func=integration_fn)
+        self._last_throttle = throttle
+        self._last_impeller_torque = impeller_torque
 
     @property
     def rpm(self) -> float:
-        return self._integrator.state
+        return self._rpm
