@@ -14,7 +14,9 @@ def test_engine_impeller_inertia(test_data: h5py.File):
     model = engine.Engine(
         time_step_ms=40,
         engine_propeller_inertia=INERTIA,
-        initial_rpm=rpm_trace[0]
+        initial_rpm=rpm_trace[0],
+        initial_throttle=throttle_trace[0],
+        initial_impeller_torque=impeller_torque_trace[0]
     )
     inputs = zip(throttle_trace, impeller_torque_trace, rpm_trace)
     outputs = []
@@ -33,8 +35,10 @@ def test_engine_rpm(test_data: h5py.File):
         time_step_ms=40,
         engine_propeller_inertia=INERTIA,
         initial_rpm=engine_rpm[0],
+        initial_throttle=throttle_trace[0],
+        initial_impeller_torque=impeller_torque_trace[0]
     )
-    inputs = zip(throttle_trace, impeller_torque_trace)
+    inputs = zip(throttle_trace[1:], impeller_torque_trace[1:])
     outputs = []
 
     for throttle, impeller_torque in inputs:
