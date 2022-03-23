@@ -100,7 +100,7 @@ class LookupTable1D(Generic[Dim1T]):
         )
         result = interpolator(x)
 
-        return result[0]
+        return result.item()
 
 
 Dim2T = TypeVar("Dim2T", bound=np.generic)
